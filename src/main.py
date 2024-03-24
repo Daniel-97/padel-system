@@ -1,30 +1,46 @@
-from fastapi import FastAPI
-from datetime import datetime
-from pydantic import BaseModel
+from fastapi import FastAPI, HTTPException
+from dotenv import load_dotenv
+import os
+import uvicorn
+from dto.Availability import AvailabilityDTO
+from dto.User import UserDTO
+from dto.Response import ResponseDTO
+import jwt
 
-class Availability(BaseModel):
-    date: datetime
-    slots: list[int]
-
-class User(BaseModel):
-    username: str
-    password: str
-
+load_dotenv()
 app = FastAPI()
 
-
 @app.put("/register")
-def register(user: User):
-    print(user)
+def register(user: UserDTO):
+
+    if user.username == '':
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid username"    
+        )
+
+    if user.password == '':
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid password"
+        )
+    
+    # TODO add user to database
+    
+    return ResponseDTO(message=f"User {user.username} successfully registered!")
+    
 
 @app.get("/login")
-def login(user: User):
+def login(user: UserDTO):
     pass
 
 @app.put("/availability")
 def put_availability(
-    availabilities: list[Availability]
+    availabilities: list[AvailabilityDTO]
 ):
     for availability in availabilities:
         availability.slots.sort()
         print(availability)
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=int(os.environ["SERVER_PORT"]))

@@ -1,2 +1,4 @@
 .venv
 src/__pycache__/
+src/dto/__pycache__/
+src/.env

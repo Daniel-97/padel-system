@@ -11,5 +11,5 @@ Install dependency:
 
 Run the server with:
 ```bash
-    uvicorn src.main:app
+    python src/main.py
 ```
