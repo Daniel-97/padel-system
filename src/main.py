@@ -4,16 +4,18 @@ from fastapi.encoders import jsonable_encoder
 from dotenv import load_dotenv
 import os
 import uvicorn
+from datetime import datetime
+import jwt
+
 from dto.Availability import AvailabilityDTO
 from dto.User import UserDTO
 from dto.Response import ResponseDTO
-import jwt
-from datetime import datetime
+from service.DatabaseService import add_user
 
+JWT_ALGORITHMS = "HS256"
 load_dotenv()
 app = FastAPI()
 
-JWT_ALGORITHMS = "HS256"
 
 @app.middleware("http")
 async def auth_middleware(request: Request, call_next):
@@ -52,9 +54,15 @@ def register(user: UserDTO):
             detail="Invalid password"
         )
     
-    # TODO add user to database
-
-    return ResponseDTO(message=f"User {user.username} successfully registered!")
+    if add_user(username=user.username, password=user.password):
+        return ResponseDTO(
+            message=f"User {user.username} successfully registered!"
+        )
+    else: 
+        return JSONResponse(
+            status_code=500,
+            content=jsonable_encoder(ResponseDTO("Username already used"))
+        )
     
 
 @app.get("/auth/login")
