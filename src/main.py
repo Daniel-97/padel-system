@@ -19,7 +19,8 @@ app = FastAPI()
 @app.middleware("http")
 async def auth_middleware(request: Request, call_next):
 
-    if 'auth' in request.url._url:
+    #todo sistemare
+    if 'auth' in request.url._url or 'doc' in request.url._url:
         return await call_next(request)
     
     token = request.headers.get('Authorization', '')    

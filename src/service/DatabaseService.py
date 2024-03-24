@@ -2,7 +2,6 @@ from sqlalchemy import create_engine, Column, String, Integer, ForeignKey, Date,
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import IntegrityError
-from dto.Availability import AvailabilityDTO
 
 Base = declarative_base()
 

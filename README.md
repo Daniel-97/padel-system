@@ -13,3 +13,6 @@ Run the server with:
 ```bash
     python src/main.py
 ```
+
+## API doc
+Go to 127.0.0.1:<you-port>/docs
