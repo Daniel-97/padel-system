@@ -3,4 +3,5 @@ from pydantic import BaseModel
 
 class AvailabilityDTO(BaseModel):
     date: datetime
-    slots: list[int]
+    start_hour: int
+    end_hour: int

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from dotenv import load_dotenv
@@ -10,12 +10,11 @@ import jwt
 from dto.Availability import AvailabilityDTO
 from dto.User import UserDTO
 from dto.Response import ResponseDTO
-from service.DatabaseService import add_user
+from service.DatabaseService import add_user, get_user, add_availability
 
 JWT_ALGORITHMS = "HS256"
 load_dotenv()
 app = FastAPI()
-
 
 @app.middleware("http")
 async def auth_middleware(request: Request, call_next):
@@ -25,14 +24,15 @@ async def auth_middleware(request: Request, call_next):
     
     token = request.headers.get('Authorization', '')    
     try:
-        jwt.decode(
+        token_data = jwt.decode(
             jwt=token.replace("Bearer ", ""),
             key=os.environ['JWT_SECRET'],
             algorithms=JWT_ALGORITHMS
         )
+        request.state.token_data = token_data
     except Exception as e:
         return JSONResponse(
-            status_code=401,
+            status_code=status.HTTP_401_UNAUTHORIZED,
             content=jsonable_encoder(ResponseDTO(message="Invalid token"))
         )
 
@@ -44,13 +44,13 @@ def register(user: UserDTO):
 
     if user.username == '':
         raise HTTPException(
-            status_code=400,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid username"    
         )
 
     if user.password == '':
         raise HTTPException(
-            status_code=400,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid password"
         )
     
@@ -59,32 +59,43 @@ def register(user: UserDTO):
             message=f"User {user.username} successfully registered!"
         )
     else: 
-        return JSONResponse(
-            status_code=500,
-            content=jsonable_encoder(ResponseDTO("Username already used"))
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Username already used"
         )
     
 
 @app.get("/auth/login")
-def login(user: UserDTO):
-    # todo aggiungere controllo utente in database
+def login(dto: UserDTO):
+    user = get_user(username=dto.username)
+    if user is None or dto.password != user.password:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid username or password"
+        )
+
     return ResponseDTO(
         message="Successfully logged in",
         data={
             "token": jwt.encode(
-                payload={"username": user.username, "created_at": datetime.now().timestamp()},
+                payload={
+                    "username": user.username,
+                    "user_id": user.id,
+                    "created_at": datetime.now().timestamp()
+                },
                 key=os.environ['JWT_SECRET'],
                 algorithm=JWT_ALGORITHMS
             )
         })
 
 @app.put("/availability")
-def put_availability(
-    availabilities: list[AvailabilityDTO]
-):
+def put_availability(availabilities: list[AvailabilityDTO], request: Request):
+
+    token_data = request.state.token_data
+    user_id = token_data['user_id']
+
     for availability in availabilities:
-        availability.slots.sort()
-        print(availability)
+        add_availability(user_id=user_id, availability=availability)
 
     return ResponseDTO(
         message="Availability set"
