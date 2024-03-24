@@ -1,7 +1,9 @@
 # PADEL API
 
-## How to run
+## Environment
+Create a `.env` file in the `src` directory, using `.env.example` as a template or manually pass the env variable to the script.
 
+## How to run
 Install dependency:
 ```bash
     pip install -r requirements.txt
@@ -9,5 +11,5 @@ Install dependency:
 
 Run the server with:
 ```bash
-    uvicorn main:app
+    uvicorn src.main:app
 ```
