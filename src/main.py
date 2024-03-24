@@ -95,7 +95,8 @@ def put_availability(availabilities: list[AvailabilityDTO], request: Request):
     user_id = token_data['user_id']
 
     for availability in availabilities:
-        add_availability(user_id=user_id, availability=availability)
+        for slot in availability.slots:
+            add_availability(user_id=user_id, date=availability.date, slot=slot)
 
     return ResponseDTO(
         message="Availability set"

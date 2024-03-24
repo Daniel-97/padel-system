@@ -19,10 +19,9 @@ class Availability(Base):
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey('user.id'))
     date = Column(Date)
-    start = Column(Integer)
-    end = Column(Integer)
+    hour = Column(Integer)
 
-    __table_args__ = (UniqueConstraint('user_id', 'date', 'start', 'end'),)
+    __table_args__ = (UniqueConstraint('user_id', 'date', 'hour'),)
 
 
 engine = create_engine('sqlite:///padel.sqlite')
@@ -49,12 +48,11 @@ def get_user(username: str):
     user = session.query(User).filter_by(username=username).first()
     return user 
 
-def add_availability(user_id: int, availability: AvailabilityDTO):
+def add_availability(user_id: int, date, slot):
     new_availability = Availability(
         user_id = user_id,
-        date = availability.date,
-        start = availability.start_hour,
-        end = availability.end_hour, 
+        date = date,
+        hour = slot
     )
     
     try:
@@ -63,4 +61,5 @@ def add_availability(user_id: int, availability: AvailabilityDTO):
         print(f"New availability add for user {user_id}: {new_availability}")
     except IntegrityError:
         session.rollback()
-        print(f"Availability {availability} already exists for user {user_id}")
+        print(f"Availability {date}, {slot} already exists for user {user_id}")
+    
