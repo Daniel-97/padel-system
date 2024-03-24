@@ -72,7 +72,7 @@ def get_slots():
         Availability.date,
         Availability.hour
     ).having(
-        func.count(Availability.user_id) >= 1
+        func.count(Availability.user_id) >= 4
     ).all()
 
     return slots
