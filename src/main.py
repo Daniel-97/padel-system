@@ -11,12 +11,11 @@ from dto.Availability import AvailabilityDTO
 from dto.User import UserDTO
 from dto.Response import ResponseDTO
 from service.DatabaseService import add_user, get_user, add_availability, get_slots, get_user_by_slot
+from utils import check_token
 
-JWT_ALGORITHMS = "HS256"
 load_dotenv()
 app = FastAPI()
 
-@app.middleware("http")
 async def auth_middleware(request: Request, call_next):
 
     #todo sistemare
@@ -28,7 +27,7 @@ async def auth_middleware(request: Request, call_next):
         token_data = jwt.decode(
             jwt=token.replace("Bearer ", ""),
             key=os.environ['JWT_SECRET'],
-            algorithms=JWT_ALGORITHMS
+            algorithms="HS256"
         )
         request.state.token_data = token_data
     except Exception as e:
@@ -85,14 +84,14 @@ def login(dto: UserDTO):
                     "created_at": datetime.now().timestamp()
                 },
                 key=os.environ['JWT_SECRET'],
-                algorithm=JWT_ALGORITHMS
+                algorithm="HS256"
             )
         })
 
 @app.put("/availability")
 def put_availability(availabilities: list[AvailabilityDTO], request: Request):
 
-    token_data = request.state.token_data
+    token_data = check_token(request.headers.get("Authorization"))
     user_id = token_data['user_id']
 
     for availability in availabilities:
@@ -104,7 +103,6 @@ def put_availability(availabilities: list[AvailabilityDTO], request: Request):
         users = get_user_by_slot(date=slot.date, hour=slot.hour)
         for user in users:
             print(f'Send email to user {user.username} for slot {slot.date} at {slot.hour}')
-            # todo add callback function for user alert
 
     return ResponseDTO(
         message="Availability set"
