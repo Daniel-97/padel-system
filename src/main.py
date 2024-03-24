@@ -6,6 +6,7 @@ from dto.Availability import AvailabilityDTO
 from dto.User import UserDTO
 from dto.Response import ResponseDTO
 import jwt
+from datetime import datetime
 
 load_dotenv()
 app = FastAPI()
@@ -26,13 +27,20 @@ def register(user: UserDTO):
         )
     
     # TODO add user to database
-    
+
     return ResponseDTO(message=f"User {user.username} successfully registered!")
     
 
 @app.get("/login")
 def login(user: UserDTO):
-    pass
+    # todo aggiungere controllo utente in database
+    return ResponseDTO(
+        data={
+            "token": jwt.encode(
+                payload={"username": user.username, "created_at": datetime.now().timestamp()},
+                key=os.environ['JWT_SECRET']
+            )
+        })
 
 @app.put("/availability")
 def put_availability(
