@@ -10,7 +10,7 @@ import jwt
 from dto.Availability import AvailabilityDTO
 from dto.User import UserDTO
 from dto.Response import ResponseDTO
-from service.DatabaseService import add_user, get_user, add_availability
+from service.DatabaseService import add_user, get_user, add_availability, get_slots, get_user_by_slot
 
 JWT_ALGORITHMS = "HS256"
 load_dotenv()
@@ -97,6 +97,13 @@ def put_availability(availabilities: list[AvailabilityDTO], request: Request):
     for availability in availabilities:
         for slot in availability.slots:
             add_availability(user_id=user_id, date=availability.date, slot=slot)
+
+    slots = get_slots()
+    for slot in slots:
+        users = get_user_by_slot(date=slot.date, hour=slot.hour)
+        for user in users:
+            print(f'Send email to user {user.username} for slot {slot.date} at {slot.hour}')
+            # todo add callback function for user alert
 
     return ResponseDTO(
         message="Availability set"

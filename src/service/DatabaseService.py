@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, String, Integer, ForeignKey, Date, UniqueConstraint
+from sqlalchemy import create_engine, Column, String, Integer, ForeignKey, Date, UniqueConstraint, func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import IntegrityError
@@ -63,3 +63,26 @@ def add_availability(user_id: int, date, slot):
         session.rollback()
         print(f"Availability {date}, {slot} already exists for user {user_id}")
     
+def get_slots():
+    slots = session.query(
+        Availability.date,
+        Availability.hour,
+        func.count(Availability.user_id).label('count')
+    ).group_by(
+        Availability.date,
+        Availability.hour
+    ).having(
+        func.count(Availability.user_id) >= 1
+    ).all()
+
+    return slots
+
+def get_user_by_slot(date, hour):
+    users = session.query(User).join(
+        Availability, User.id == Availability.user_id
+    ).filter(
+        Availability.date == date,
+        Availability.hour == hour
+    ).all()
+
+    return users
