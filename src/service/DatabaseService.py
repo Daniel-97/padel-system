@@ -36,7 +36,7 @@ def add_user(username: str, password: str):
         print(f"User {username} already used!")
         return None
     
-    new_user = User(username=username, password=password)
+    new_user = User(username=username, password=password) # todo add password hashing
     session.add(new_user)
     session.commit()
     print(f"New user {username} add to database")
