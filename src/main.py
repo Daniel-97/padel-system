@@ -71,6 +71,11 @@ def put_availability(availabilities: list[AvailabilityDTO], request: Request):
 
     for availability in availabilities:
         for slot in availability.slots:
+            if slot < 9 or slot > 23:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Invalid slot. Possible slot are from 9 to 23"
+                )
             add_availability(user_id=user_id, date=availability.date, slot=slot)
 
     slots = get_slots()
