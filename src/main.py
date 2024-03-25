@@ -1,6 +1,4 @@
 from fastapi import FastAPI, HTTPException, Request, status
-from fastapi.responses import JSONResponse
-from fastapi.encoders import jsonable_encoder
 from dotenv import load_dotenv
 import os
 import uvicorn
