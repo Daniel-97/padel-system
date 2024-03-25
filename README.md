@@ -15,4 +15,4 @@ Run the server with:
 ```
 
 ## API doc
-Go to 127.0.0.1:<you-port>/docs
+Go to http://127.0.0.1:8000/docs
