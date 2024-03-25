@@ -1,27 +1,7 @@
-from sqlalchemy import create_engine, Column, String, Integer, ForeignKey, Date, UniqueConstraint, func
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import create_engine, func
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import IntegrityError
-
-Base = declarative_base()
-
-class User(Base):
-    __tablename__ = 'user'
-
-    id = Column(Integer, primary_key=True)
-    username = Column(String, unique=True)
-    password = Column(String)
-
-class Availability(Base):
-    __tablename__ = 'availability'
-
-    id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('user.id'))
-    date = Column(Date)
-    hour = Column(Integer)
-
-    __table_args__ = (UniqueConstraint('user_id', 'date', 'hour'),)
-
+from model.model import Base, Availability, User
 
 engine = create_engine('sqlite:///padel.sqlite')
 conn = engine.connect()
