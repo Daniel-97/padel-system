@@ -16,29 +16,6 @@ from utils import check_token
 load_dotenv()
 app = FastAPI()
 
-async def auth_middleware(request: Request, call_next):
-
-    #todo sistemare
-    if 'auth' in request.url._url or 'doc' in request.url._url:
-        return await call_next(request)
-    
-    token = request.headers.get('Authorization', '')    
-    try:
-        token_data = jwt.decode(
-            jwt=token.replace("Bearer ", ""),
-            key=os.environ['JWT_SECRET'],
-            algorithms="HS256"
-        )
-        request.state.token_data = token_data
-    except Exception as e:
-        return JSONResponse(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            content=jsonable_encoder(ResponseDTO(message="Invalid token"))
-        )
-
-    response = await call_next(request)
-    return response
-
 @app.put("/auth/register")
 def register(user: UserDTO):
 
