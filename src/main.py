@@ -40,7 +40,7 @@ def register(user: UserDTO):
         )
     
 
-@app.get("/auth/login")
+@app.post("/auth/login")
 def login(dto: UserDTO):
     user = get_user(username=dto.username)
     if user is None or dto.password != user.password:
